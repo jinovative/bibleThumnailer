@@ -4,7 +4,7 @@ import { cn } from "../utils/cn";
 import { formatBibleRef, type BibleReference } from "../utils/formatters";
 import type { UnsplashImage } from "./ImageGrid";
 
-export type LayoutType = "overlay" | "minimal" | "side-modern";
+export type LayoutType = "overlay" | "minimal" | "side-modern" | "center";
 
 export interface ThumbnailPreviewProps {
     layout: LayoutType;
@@ -12,10 +12,21 @@ export interface ThumbnailPreviewProps {
     pastor: string;
     title: string;
     date: string;
+    churchName: string;
+    serviceType: string;
     bibleRef: BibleReference | null;
 }
 
-export function ThumbnailPreview({ layout, image, pastor, title, date, bibleRef }: ThumbnailPreviewProps) {
+export function ThumbnailPreview({
+    layout,
+    image,
+    pastor,
+    title,
+    date,
+    churchName,
+    serviceType,
+    bibleRef,
+}: ThumbnailPreviewProps) {
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
     useEffect(() => {
@@ -92,12 +103,12 @@ export function ThumbnailPreview({ layout, image, pastor, title, date, bibleRef 
 
             ctx.font = `${fontWeight} ${fontSize}px Inter, Pretendard, system-ui, sans-serif`;
 
-            // Preserve bible reference patterns (e.g., "1:4", "1:4-5", "1:4-1:9", "1:4 - 1:9")
+            // Preserve bible reference patterns (e.g., "1:4", "1:4-5", "1:1-9")
             // We need to match both single references and range references
-            // Priority: range pattern first (e.g., "1:4 - 1:9"), then single pattern (e.g., "1:4")
-            // Range pattern: 숫자:숫자 - 숫자:숫자 (with spaces around dash)
-            // Single pattern: 숫자:숫자 or 숫자:숫자-숫자 or 숫자:숫자-숫자:숫자
-            const rangePattern = /\d+:\d+\s*-\s*\d+:\d+/g;
+            // Priority: range pattern first (e.g., "1:4-9"), then single pattern (e.g., "1:4")
+            // Range pattern: 숫자:숫자-숫자 (same chapter, verse range)
+            // Single pattern: 숫자:숫자 or 숫자:숫자-숫자
+            const rangePattern = /\d+:\d+-\d+/g;
             const singlePattern = /\d+:\d+(?:-\d+(?::\d+)?)?/g;
 
             // First, find all range patterns, then single patterns
@@ -247,7 +258,7 @@ export function ThumbnailPreview({ layout, image, pastor, title, date, bibleRef 
             lines.forEach((line) => {
                 let textX = x;
                 if (align === "center") {
-                    textX = x + width / 2;
+                    textX = x;
                 } else if (align === "right") {
                     textX = x + width;
                 }
@@ -282,6 +293,27 @@ export function ThumbnailPreview({ layout, image, pastor, title, date, bibleRef 
                     gradient.addColorStop(1, "rgba(0,0,0,0.8)");
                     ctx.fillStyle = gradient;
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                    // Church name and service type at top left (transparent background)
+                    if (churchName || serviceType) {
+                        ctx.font = "bold 32px Inter, Pretendard, system-ui, sans-serif";
+                        ctx.textAlign = "left";
+                        ctx.fillStyle = "#ffffff";
+                        ctx.strokeStyle = "rgba(0,0,0,0.5)";
+                        ctx.lineWidth = 3;
+                        ctx.lineJoin = "round";
+                        ctx.miterLimit = 2;
+                        const headerText: string[] = [];
+                        if (churchName) headerText.push(churchName);
+                        if (serviceType) headerText.push(serviceType);
+                        const headerTextStr = headerText.join(" • ");
+                        if (headerTextStr) {
+                            // Draw text with stroke for better visibility
+                            ctx.strokeText(headerTextStr, 50, 50);
+                            ctx.fillText(headerTextStr, 50, 50);
+                        }
+                    }
+
                     const lines = [];
                     const bibleRefSize = title ? 56 : 96; // Larger if no title
                     if (title) lines.push({ text: title, fontSize: 80, fontWeight: "bold" });
@@ -290,19 +322,41 @@ export function ThumbnailPreview({ layout, image, pastor, title, date, bibleRef 
                     if (date) lines.push({ text: date, fontSize: 30, fontWeight: "normal" });
                     if (pastor) lines.push({ text: `${pastor}`, fontSize: 30, fontWeight: "normal" });
 
-                    // Calculate total height to center vertically when no title
+                    // Calculate total height to center vertically
                     let totalHeight = 0;
                     lines.forEach((line) => {
                         const wrapped = wrapText(line.text, canvas.width - 160, line.fontSize, line.fontWeight);
                         totalHeight += wrapped.length * line.fontSize * 1.5;
                     });
 
-                    const startY = title ? 120 : (canvas.height - totalHeight) / 2;
+                    // Center text vertically in the middle of the image
+                    const startY = (canvas.height - totalHeight) / 2;
                     drawTextBlock(80, startY, canvas.width - 160, "left", lines);
                 }
                 // Layout 2: Minimal - Small text overlay at corner
                 else if (layout === "minimal") {
                     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                    // Church name and service type at top-left (transparent background)
+                    if (churchName || serviceType) {
+                        ctx.font = "bold 30px Inter, Pretendard, system-ui, sans-serif";
+                        ctx.textAlign = "left";
+                        ctx.fillStyle = "#ffffff";
+                        ctx.strokeStyle = "rgba(0,0,0,0.5)";
+                        ctx.lineWidth = 3;
+                        ctx.lineJoin = "round";
+                        ctx.miterLimit = 2;
+                        const headerText: string[] = [];
+                        if (churchName) headerText.push(churchName);
+                        if (serviceType) headerText.push(serviceType);
+                        const headerTextStr = headerText.join(" • ");
+                        if (headerTextStr) {
+                            // Draw text with stroke for better visibility
+                            ctx.strokeText(headerTextStr, 50, 50);
+                            ctx.fillText(headerTextStr, 50, 50);
+                        }
+                    }
+
                     ctx.fillStyle = "rgba(0,0,0,0.7)";
                     const cornerWidth = 500;
                     const cornerHeight = 200;
@@ -383,6 +437,30 @@ export function ThumbnailPreview({ layout, image, pastor, title, date, bibleRef 
                     const textBlockWidth = canvas.width - splitX - panelPadding - rightPadding;
 
                     const rightTextLines = [];
+
+                    // Church name and service type at top of panel
+                    if (churchName || serviceType) {
+                        const headerText: string[] = [];
+                        if (churchName) headerText.push(churchName);
+                        if (serviceType) headerText.push(serviceType);
+                        const headerTextStr = headerText.join(" • ");
+                        if (headerTextStr) {
+                            rightTextLines.push({
+                                text: headerTextStr,
+                                fontSize: 36,
+                                fontWeight: "bold",
+                                color: textColor,
+                            });
+                            // Add spacing
+                            rightTextLines.push({
+                                text: "",
+                                fontSize: 16,
+                                fontWeight: "normal",
+                                color: textColor,
+                            });
+                        }
+                    }
+
                     if (title) {
                         rightTextLines.push({ text: title, fontSize: 64, fontWeight: "bold", color: textColor });
                     }
@@ -453,14 +531,317 @@ export function ThumbnailPreview({ layout, image, pastor, title, date, bibleRef 
                         totalHeight += wrapped.length * line.fontSize * 1.5;
                     });
 
-                    const yPos = title ? 100 : (canvas.height - totalHeight) / 2;
+                    // Center text vertically in the middle of the panel
+                    const yPos = (canvas.height - totalHeight) / 2;
                     drawTextBlock(textBlockX, yPos, textBlockWidth, "left", rightTextLines);
+                }
+                // Layout 4: Center - Centered text layout
+                else if (layout === "center") {
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                    // Subtle gradient overlay
+                    const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+                    gradient.addColorStop(0, "rgba(0,0,0,0.2)");
+                    gradient.addColorStop(0.7, "rgba(0,0,0,0.4)");
+                    gradient.addColorStop(1, "rgba(0,0,0,0.7)");
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                    // Church name and service type at top left (transparent background)
+                    if (churchName || serviceType) {
+                        ctx.font = "bold 32px Inter, Pretendard, system-ui, sans-serif";
+                        ctx.textAlign = "left";
+                        ctx.fillStyle = "#ffffff";
+                        ctx.strokeStyle = "rgba(0,0,0,0.5)";
+                        ctx.lineWidth = 3;
+                        ctx.lineJoin = "round";
+                        ctx.miterLimit = 2;
+                        const headerText: string[] = [];
+                        if (churchName) headerText.push(churchName);
+                        if (serviceType) headerText.push(serviceType);
+                        const headerTextStr = headerText.join(" • ");
+                        if (headerTextStr) {
+                            // Draw text with stroke for better visibility
+                            ctx.strokeText(headerTextStr, 50, 50);
+                            ctx.fillText(headerTextStr, 50, 50);
+                        }
+                    }
+
+                    // Main content area - centered horizontally and vertically in the middle of image
+                    const contentPadding = 80;
+                    const contentWidth = canvas.width - contentPadding * 2;
+                    const lines = [];
+
+                    if (title) {
+                        lines.push({ text: title, fontSize: 72, fontWeight: "bold", color: "#ffffff" });
+                    }
+
+                    if (bibleRef) {
+                        const bibleRefSize = title ? 48 : 80;
+                        lines.push({
+                            text: formatBibleRef(bibleRef),
+                            fontSize: bibleRefSize,
+                            fontWeight: "bold",
+                            color: "#ffffff",
+                        });
+                    }
+
+                    if (pastor) {
+                        lines.push({ text: pastor, fontSize: 36, fontWeight: "normal", color: "#ffffff" });
+                    }
+
+                    if (date) {
+                        lines.push({ text: date, fontSize: 28, fontWeight: "normal", color: "#ffffff" });
+                    }
+
+                    // Calculate total height to center vertically in the middle of the image
+                    let totalHeight = 0;
+                    lines.forEach((line) => {
+                        const wrapped = wrapText(line.text, contentWidth, line.fontSize, line.fontWeight);
+                        totalHeight += wrapped.length * line.fontSize * 1.5;
+                    });
+
+                    // Center text in the middle of the image
+                    const startY = (canvas.height - totalHeight) / 2;
+                    drawTextBlock(canvas.width / 2, startY, contentWidth, "center", lines);
                 }
 
                 drawWithLayout();
             };
             img.onerror = () => {
-                // Fallback: draw text only
+                // Fallback: draw text only (match the selected layout)
+                if (layout === "center") {
+                    // Center layout fallback
+                    if (churchName || serviceType) {
+                        ctx.font = "bold 32px Inter, Pretendard, system-ui, sans-serif";
+                        ctx.textAlign = "left";
+                        ctx.fillStyle = "#ffffff";
+                        ctx.strokeStyle = "rgba(0,0,0,0.5)";
+                        ctx.lineWidth = 3;
+                        ctx.lineJoin = "round";
+                        ctx.miterLimit = 2;
+                        const headerText: string[] = [];
+                        if (churchName) headerText.push(churchName);
+                        if (serviceType) headerText.push(serviceType);
+                        const headerTextStr = headerText.join(" • ");
+                        if (headerTextStr) {
+                            // Draw text with stroke for better visibility
+                            ctx.strokeText(headerTextStr, 50, 50);
+                            ctx.fillText(headerTextStr, 50, 50);
+                        }
+                    }
+
+                    const contentPadding = 80;
+                    const contentWidth = canvas.width - contentPadding * 2;
+                    const lines = [];
+
+                    if (title) {
+                        lines.push({ text: title, fontSize: 72, fontWeight: "bold", color: "#ffffff" });
+                    }
+
+                    if (bibleRef) {
+                        const bibleRefSize = title ? 48 : 80;
+                        lines.push({
+                            text: formatBibleRef(bibleRef),
+                            fontSize: bibleRefSize,
+                            fontWeight: "bold",
+                            color: "#ffffff",
+                        });
+                    }
+
+                    if (pastor) {
+                        lines.push({ text: pastor, fontSize: 36, fontWeight: "normal", color: "#ffffff" });
+                    }
+
+                    if (date) {
+                        lines.push({ text: date, fontSize: 28, fontWeight: "normal", color: "#ffffff" });
+                    }
+
+                    let totalHeight = 0;
+                    lines.forEach((line) => {
+                        const wrapped = wrapText(line.text, contentWidth, line.fontSize, line.fontWeight);
+                        totalHeight += wrapped.length * line.fontSize * 1.5;
+                    });
+
+                    // Center text in the middle of the image
+                    const startY = (canvas.height - totalHeight) / 2;
+                    drawTextBlock(canvas.width / 2, startY, contentWidth, "center", lines);
+                } else if (layout === "overlay") {
+                    // Overlay layout fallback - add church name and service type
+                    if (churchName || serviceType) {
+                        ctx.font = "bold 32px Inter, Pretendard, system-ui, sans-serif";
+                        ctx.textAlign = "left";
+                        ctx.fillStyle = "#ffffff";
+                        ctx.strokeStyle = "rgba(0,0,0,0.5)";
+                        ctx.lineWidth = 3;
+                        ctx.lineJoin = "round";
+                        ctx.miterLimit = 2;
+                        const headerText: string[] = [];
+                        if (churchName) headerText.push(churchName);
+                        if (serviceType) headerText.push(serviceType);
+                        const headerTextStr = headerText.join(" • ");
+                        if (headerTextStr) {
+                            // Draw text with stroke for better visibility
+                            ctx.strokeText(headerTextStr, 50, 50);
+                            ctx.fillText(headerTextStr, 50, 50);
+                        }
+                    }
+
+                    const lines = [];
+                    const bibleRefSize = title ? 56 : 96;
+                    if (title) lines.push({ text: title, fontSize: 80, fontWeight: "bold" });
+                    if (bibleRef)
+                        lines.push({ text: formatBibleRef(bibleRef), fontSize: bibleRefSize, fontWeight: "bold" });
+                    if (date) lines.push({ text: date, fontSize: 30, fontWeight: "normal" });
+                    if (pastor) lines.push({ text: `${pastor}`, fontSize: 30, fontWeight: "normal" });
+
+                    let totalHeight = 0;
+                    lines.forEach((line) => {
+                        const wrapped = wrapText(line.text, canvas.width - 160, line.fontSize, line.fontWeight);
+                        totalHeight += wrapped.length * line.fontSize * 1.5;
+                    });
+
+                    // Center text vertically in the middle of the image
+                    const startY = (canvas.height - totalHeight) / 2;
+                    drawTextBlock(80, startY, canvas.width - 160, "left", lines);
+                } else if (layout === "minimal") {
+                    // Minimal layout fallback - add church name and service type
+                    if (churchName || serviceType) {
+                        ctx.font = "bold 30px Inter, Pretendard, system-ui, sans-serif";
+                        ctx.textAlign = "left";
+                        ctx.fillStyle = "#ffffff";
+                        ctx.strokeStyle = "rgba(0,0,0,0.5)";
+                        ctx.lineWidth = 3;
+                        ctx.lineJoin = "round";
+                        ctx.miterLimit = 2;
+                        const headerText: string[] = [];
+                        if (churchName) headerText.push(churchName);
+                        if (serviceType) headerText.push(serviceType);
+                        const headerTextStr = headerText.join(" • ");
+                        if (headerTextStr) {
+                            // Draw text with stroke for better visibility
+                            ctx.strokeText(headerTextStr, 50, 50);
+                            ctx.fillText(headerTextStr, 50, 50);
+                        }
+                    }
+
+                    const lines = [];
+                    const bibleRefSize = title ? 56 : 96;
+                    if (title) lines.push({ text: title, fontSize: 80, fontWeight: "bold" });
+                    if (bibleRef)
+                        lines.push({ text: formatBibleRef(bibleRef), fontSize: bibleRefSize, fontWeight: "bold" });
+                    if (date) lines.push({ text: date, fontSize: 30, fontWeight: "normal" });
+                    if (pastor) lines.push({ text: `${pastor}`, fontSize: 30, fontWeight: "normal" });
+
+                    let totalHeight = 0;
+                    lines.forEach((line) => {
+                        const wrapped = wrapText(line.text, canvas.width - 160, line.fontSize, line.fontWeight);
+                        totalHeight += wrapped.length * line.fontSize * 1.5;
+                    });
+
+                    const startY = title ? 120 : (canvas.height - totalHeight) / 2;
+                    drawTextBlock(80, startY, canvas.width - 160, "left", lines);
+                } else {
+                    // Side-modern and other layouts fallback
+                    const lines = [];
+                    const bibleRefSize = title ? 56 : 96;
+                    if (title) lines.push({ text: title, fontSize: 80, fontWeight: "bold" });
+                    if (bibleRef)
+                        lines.push({ text: formatBibleRef(bibleRef), fontSize: bibleRefSize, fontWeight: "bold" });
+                    if (date) lines.push({ text: date, fontSize: 30, fontWeight: "normal" });
+                    if (pastor) lines.push({ text: `${pastor}`, fontSize: 30, fontWeight: "normal" });
+
+                    let totalHeight = 0;
+                    lines.forEach((line) => {
+                        const wrapped = wrapText(line.text, canvas.width - 160, line.fontSize, line.fontWeight);
+                        totalHeight += wrapped.length * line.fontSize * 1.5;
+                    });
+
+                    const startY = title ? 120 : (canvas.height - totalHeight) / 2;
+                    drawTextBlock(80, startY, canvas.width - 160, "left", lines);
+                }
+                drawWithLayout();
+            };
+            img.src = image.urls.regular;
+        } else {
+            // No image: draw text only (match the selected layout)
+            if (layout === "center") {
+                // Center layout without image
+                if (churchName || serviceType) {
+                    ctx.font = "bold 32px Inter, Pretendard, system-ui, sans-serif";
+                    ctx.textAlign = "left";
+                    ctx.fillStyle = "#ffffff";
+                    ctx.strokeStyle = "rgba(0,0,0,0.5)";
+                    ctx.lineWidth = 3;
+                    ctx.lineJoin = "round";
+                    ctx.miterLimit = 2;
+                    const headerText: string[] = [];
+                    if (churchName) headerText.push(churchName);
+                    if (serviceType) headerText.push(serviceType);
+                    const headerTextStr = headerText.join(" • ");
+                    if (headerTextStr) {
+                        // Draw text with stroke for better visibility
+                        ctx.strokeText(headerTextStr, 50, 50);
+                        ctx.fillText(headerTextStr, 50, 50);
+                    }
+                }
+
+                const contentPadding = 80;
+                const contentWidth = canvas.width - contentPadding * 2;
+                const lines = [];
+
+                if (title) {
+                    lines.push({ text: title, fontSize: 72, fontWeight: "bold", color: "#ffffff" });
+                }
+
+                if (bibleRef) {
+                    const bibleRefSize = title ? 48 : 80;
+                    lines.push({
+                        text: formatBibleRef(bibleRef),
+                        fontSize: bibleRefSize,
+                        fontWeight: "bold",
+                        color: "#ffffff",
+                    });
+                }
+
+                if (pastor) {
+                    lines.push({ text: pastor, fontSize: 36, fontWeight: "normal", color: "#ffffff" });
+                }
+
+                if (date) {
+                    lines.push({ text: date, fontSize: 28, fontWeight: "normal", color: "#ffffff" });
+                }
+
+                let totalHeight = 0;
+                lines.forEach((line) => {
+                    const wrapped = wrapText(line.text, contentWidth, line.fontSize, line.fontWeight);
+                    totalHeight += wrapped.length * line.fontSize * 1.5;
+                });
+
+                // Center text in the middle of the image
+                const startY = (canvas.height - totalHeight) / 2;
+                drawTextBlock(canvas.width / 2, startY, contentWidth, "center", lines);
+            } else if (layout === "overlay") {
+                // Overlay layout without image
+                if (churchName || serviceType) {
+                    ctx.font = "bold 32px Inter, Pretendard, system-ui, sans-serif";
+                    ctx.textAlign = "left";
+                    ctx.fillStyle = "#ffffff";
+                    ctx.strokeStyle = "rgba(0,0,0,0.5)";
+                    ctx.lineWidth = 3;
+                    ctx.lineJoin = "round";
+                    ctx.miterLimit = 2;
+                    const headerText: string[] = [];
+                    if (churchName) headerText.push(churchName);
+                    if (serviceType) headerText.push(serviceType);
+                    const headerTextStr = headerText.join(" • ");
+                    if (headerTextStr) {
+                        // Draw text with stroke for better visibility
+                        ctx.strokeText(headerTextStr, 50, 50);
+                        ctx.fillText(headerTextStr, 50, 50);
+                    }
+                }
+
                 const lines = [];
                 const bibleRefSize = title ? 56 : 96;
                 if (title) lines.push({ text: title, fontSize: 80, fontWeight: "bold" });
@@ -469,7 +850,44 @@ export function ThumbnailPreview({ layout, image, pastor, title, date, bibleRef 
                 if (date) lines.push({ text: date, fontSize: 30, fontWeight: "normal" });
                 if (pastor) lines.push({ text: `${pastor}`, fontSize: 30, fontWeight: "normal" });
 
-                // Calculate total height to center vertically when no title
+                let totalHeight = 0;
+                lines.forEach((line) => {
+                    const wrapped = wrapText(line.text, canvas.width - 160, line.fontSize, line.fontWeight);
+                    totalHeight += wrapped.length * line.fontSize * 1.5;
+                });
+
+                // Center text vertically in the middle of the image
+                const startY = (canvas.height - totalHeight) / 2;
+                drawTextBlock(80, startY, canvas.width - 160, "left", lines);
+            } else if (layout === "minimal") {
+                // Minimal layout without image
+                if (churchName || serviceType) {
+                    ctx.font = "bold 30px Inter, Pretendard, system-ui, sans-serif";
+                    ctx.textAlign = "left";
+                    ctx.fillStyle = "#ffffff";
+                    ctx.strokeStyle = "rgba(0,0,0,0.5)";
+                    ctx.lineWidth = 3;
+                    ctx.lineJoin = "round";
+                    ctx.miterLimit = 2;
+                    const headerText: string[] = [];
+                    if (churchName) headerText.push(churchName);
+                    if (serviceType) headerText.push(serviceType);
+                    const headerTextStr = headerText.join(" • ");
+                    if (headerTextStr) {
+                        // Draw text with stroke for better visibility
+                        ctx.strokeText(headerTextStr, 50, 50);
+                        ctx.fillText(headerTextStr, 50, 50);
+                    }
+                }
+
+                const lines = [];
+                const bibleRefSize = title ? 56 : 96;
+                if (title) lines.push({ text: title, fontSize: 80, fontWeight: "bold" });
+                if (bibleRef)
+                    lines.push({ text: formatBibleRef(bibleRef), fontSize: bibleRefSize, fontWeight: "bold" });
+                if (date) lines.push({ text: date, fontSize: 30, fontWeight: "normal" });
+                if (pastor) lines.push({ text: `${pastor}`, fontSize: 30, fontWeight: "normal" });
+
                 let totalHeight = 0;
                 lines.forEach((line) => {
                     const wrapped = wrapText(line.text, canvas.width - 160, line.fontSize, line.fontWeight);
@@ -478,30 +896,28 @@ export function ThumbnailPreview({ layout, image, pastor, title, date, bibleRef 
 
                 const startY = title ? 120 : (canvas.height - totalHeight) / 2;
                 drawTextBlock(80, startY, canvas.width - 160, "left", lines);
-                drawWithLayout();
-            };
-            img.src = image.urls.regular;
-        } else {
-            // No image: draw text only
-            const lines = [];
-            const bibleRefSize = title ? 56 : 96;
-            if (title) lines.push({ text: title, fontSize: 80, fontWeight: "bold" });
-            if (bibleRef) lines.push({ text: formatBibleRef(bibleRef), fontSize: bibleRefSize, fontWeight: "bold" });
-            if (date) lines.push({ text: date, fontSize: 30, fontWeight: "normal" });
-            if (pastor) lines.push({ text: `${pastor}`, fontSize: 30, fontWeight: "normal" });
+            } else {
+                // Side-modern and other layouts without image
+                const lines = [];
+                const bibleRefSize = title ? 56 : 96;
+                if (title) lines.push({ text: title, fontSize: 80, fontWeight: "bold" });
+                if (bibleRef)
+                    lines.push({ text: formatBibleRef(bibleRef), fontSize: bibleRefSize, fontWeight: "bold" });
+                if (date) lines.push({ text: date, fontSize: 30, fontWeight: "normal" });
+                if (pastor) lines.push({ text: `${pastor}`, fontSize: 30, fontWeight: "normal" });
 
-            // Calculate total height to center vertically when no title
-            let totalHeight = 0;
-            lines.forEach((line) => {
-                const wrapped = wrapText(line.text, canvas.width - 160, line.fontSize, line.fontWeight);
-                totalHeight += wrapped.length * line.fontSize * 1.5;
-            });
+                let totalHeight = 0;
+                lines.forEach((line) => {
+                    const wrapped = wrapText(line.text, canvas.width - 160, line.fontSize, line.fontWeight);
+                    totalHeight += wrapped.length * line.fontSize * 1.5;
+                });
 
-            const startY = title ? 120 : (canvas.height - totalHeight) / 2;
-            drawTextBlock(80, startY, canvas.width - 160, "left", lines);
+                const startY = title ? 120 : (canvas.height - totalHeight) / 2;
+                drawTextBlock(80, startY, canvas.width - 160, "left", lines);
+            }
             drawWithLayout();
         }
-    }, [layout, image, pastor, title, date, bibleRef]);
+    }, [layout, image, pastor, title, date, churchName, serviceType, bibleRef]);
 
     const handleExport = () => {
         if (!previewUrl) return;
@@ -522,8 +938,8 @@ export function ThumbnailPreview({ layout, image, pastor, title, date, bibleRef 
                 ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-400">
                         <div className="text-center">
-                            <p className="text-lg font-medium mb-2">Preview</p>
-                            <p className="text-sm">Select image and fill metadata</p>
+                            <p className="text-lg font-medium mb-2">미리보기</p>
+                            <p className="text-sm">이미지를 선택하고 정보를 입력하세요</p>
                         </div>
                     </div>
                 )}
@@ -541,13 +957,11 @@ export function ThumbnailPreview({ layout, image, pastor, title, date, bibleRef 
                     )}
                 >
                     <Download className="w-4 h-4" />
-                    Export Thumbnail
+                    썸네일 내보내기
                 </button>
             </div>
 
-            {isExportDisabled && (
-                <p className="text-sm text-gray-500 text-center">Complete required fields to export</p>
-            )}
+            {isExportDisabled && <p className="text-sm text-gray-500 text-center">필수 항목을 입력해주세요</p>}
         </div>
     );
 }

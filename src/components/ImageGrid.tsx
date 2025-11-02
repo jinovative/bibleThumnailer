@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { cn } from "../utils/cn";
-import { Check } from "lucide-react";
+import { Check, Upload } from "lucide-react";
 
 export interface UnsplashImage {
     id: string;
@@ -13,6 +13,7 @@ export interface UnsplashImage {
     user: {
         name: string;
     };
+    isUploaded?: boolean; // Flag for uploaded images
 }
 
 export interface ImageGridProps {
@@ -87,12 +88,46 @@ const SAMPLE_IMAGES: UnsplashImage[] = [
         alt_description: "Worship setting",
         user: { name: "Unsplash" },
     },
+    {
+        id: "7",
+        urls: {
+            thumb: "https://images.unsplash.com/photo-1470686164816-830d3688f62c?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1473?w=300",
+            regular:
+                "https://images.unsplash.com/photo-1470686164816-830d3688f62c?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1473?w=800",
+            full: "https://images.unsplash.com/photo-1470686164816-830d3688f62c?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1473?w=1920",
+        },
+        alt_description: "Worship setting",
+        user: { name: "Unsplash" },
+    },
+    {
+        id: "8",
+        urls: {
+            thumb: "https://images.unsplash.com/photo-1480185660311-81671f39489c?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1469?w=300",
+            regular:
+                "https://images.unsplash.com/photo-1480185660311-81671f39489c?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1469?w=800",
+            full: "https://images.unsplash.com/photo-1480185660311-81671f39489c?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1469?w=1920",
+        },
+        alt_description: "Worship setting",
+        user: { name: "Unsplash" },
+    },
+    {
+        id: "9",
+        urls: {
+            thumb: "https://images.unsplash.com/photo-1499652848871-1527a310b13a?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1548?w=300",
+            regular:
+                "https://images.unsplash.com/photo-1499652848871-1527a310b13a?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1548?w=800",
+            full: "https://images.unsplash.com/photo-1499652848871-1527a310b13a?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1548?w=1920",
+        },
+        alt_description: "Worship setting",
+        user: { name: "Unsplash" },
+    },
 ];
 
 export function ImageGrid({ selectedImageId, onSelectImage }: ImageGridProps) {
     const [images, setImages] = useState<UnsplashImage[]>(SAMPLE_IMAGES);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         setLoading(true);
@@ -120,16 +155,65 @@ export function ImageGrid({ selectedImageId, onSelectImage }: ImageGridProps) {
         }
     };
 
+    const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        if (!file.type.startsWith("image/")) {
+            alert("이미지 파일만 업로드 가능합니다.");
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const imageUrl = e.target?.result as string;
+            const uploadedImage: UnsplashImage = {
+                id: `uploaded-${Date.now()}`,
+                urls: {
+                    thumb: imageUrl,
+                    regular: imageUrl,
+                    full: imageUrl,
+                },
+                alt_description: file.name,
+                user: { name: "업로드된 이미지" },
+                isUploaded: true,
+            };
+
+            setImages((prev) => [uploadedImage, ...prev]);
+            onSelectImage(uploadedImage);
+        };
+        reader.readAsDataURL(file);
+
+        // Reset input
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
+    };
+
+    const handleUploadClick = () => {
+        fileInputRef.current?.click();
+    };
+
     if (error) {
         return (
             <div className="p-4 text-center text-red-600 bg-red-50 rounded-lg border border-red-200">
-                Image source unavailable. Using placeholder.
+                이미지 소스를 사용할 수 없습니다. 플레이스홀더를 사용합니다.
             </div>
         );
     }
 
     return (
-        <div className="w-full">
+        <div className="w-full space-y-4">
+            <div className="flex items-center gap-2">
+                <button
+                    onClick={handleUploadClick}
+                    className="flex items-center gap-2 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors text-sm font-medium"
+                >
+                    <Upload className="w-4 h-4" />
+                    이미지 업로드
+                </button>
+                <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
+            </div>
             <div className="grid grid-cols-3 gap-4">
                 {loading
                     ? Array.from({ length: 6 }).map((_, i) => (
@@ -149,9 +233,11 @@ export function ImageGrid({ selectedImageId, onSelectImage }: ImageGridProps) {
                               >
                                   <img
                                       src={image.urls.thumb}
-                                      alt={image.alt_description || "Thumbnail image"}
+                                      alt={image.alt_description || "썸네일 이미지"}
                                       className="w-full h-full object-cover"
-                                      onError={() => setError("Image source unavailable. Using placeholder.")}
+                                      onError={() =>
+                                          setError("이미지 소스를 사용할 수 없습니다. 플레이스홀더를 사용합니다.")
+                                      }
                                   />
                                   {isSelected && (
                                       <div className="absolute inset-0 bg-primary-500/20 flex items-center justify-center">

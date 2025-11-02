@@ -129,7 +129,7 @@ export function BibleSelector({
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <input
                         type="text"
-                        placeholder="Search books..."
+                        placeholder="책 이름 검색..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
@@ -151,35 +151,35 @@ export function BibleSelector({
                                 rangeMode ? "bg-primary-500 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                             )}
                         >
-                            {rangeMode ? "Range Mode (ON)" : "Range Mode"}
+                            {rangeMode ? "구간 선택 모드 (ON)" : "구간 선택 모드"}
                         </button>
                         {rangeMode && (
                             <button
                                 onClick={clearRange}
                                 className="px-2 py-1 text-xs text-gray-500 hover:text-gray-700"
                             >
-                                Cancel
+                                취소
                             </button>
                         )}
                     </div>
                     {rangeMode && rangeStartVerse && (
                         <div className="px-3 py-2 bg-primary-50 border border-primary-200 rounded-md">
                             <div className="text-sm font-medium text-primary-700">
-                                Start: {rangeStartVerse.book} {rangeStartVerse.chapter}:{rangeStartVerse.verse}
+                                시작: {rangeStartVerse.book} {rangeStartVerse.chapter}:{rangeStartVerse.verse}
                             </div>
-                            <div className="text-xs text-primary-600 mt-1">Click end verse to complete range</div>
+                            <div className="text-xs text-primary-600 mt-1">끝 절을 클릭하여 구간을 완성하세요</div>
                         </div>
                     )}
                     {rangeMode && !rangeStartVerse && (
                         <div className="px-3 py-2 bg-blue-50 border border-blue-200 rounded-md">
-                            <div className="text-sm text-blue-700">Click a verse to select range start</div>
+                            <div className="text-sm text-blue-700">시작 절을 클릭하여 구간 선택을 시작하세요</div>
                         </div>
                     )}
                 </div>
             </div>
             <div className="max-h-96 overflow-y-auto">
                 {filteredBooks.length === 0 ? (
-                    <div className="p-4 text-center text-gray-500">No books found</div>
+                    <div className="p-4 text-center text-gray-500">책을 찾을 수 없습니다</div>
                 ) : (
                     filteredBooks.map((book) => {
                         const isExpanded = expandedBooks.has(book);
@@ -226,7 +226,7 @@ export function BibleSelector({
                                                         )}
                                                     >
                                                         <span className="text-sm">
-                                                            Chapter {chapter} ({verseCount} verses)
+                                                            {chapter}장 ({verseCount}절)
                                                         </span>
                                                         <ChevronDown
                                                             className={cn(

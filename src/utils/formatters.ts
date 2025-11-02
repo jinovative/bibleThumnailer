@@ -7,7 +7,7 @@ export interface BibleReference {
 
 export function formatBibleRef({ book, chapter, verse, endVerse }: BibleReference): string {
     if (endVerse && endVerse !== verse) {
-        return `${book} ${chapter}:${verse} - ${chapter}:${endVerse}`;
+        return `${book} ${chapter}:${verse}-${endVerse}`;
     }
     return `${book} ${chapter}:${verse}`;
 }

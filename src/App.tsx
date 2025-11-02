@@ -22,6 +22,8 @@ function App() {
     const [pastor, setPastor] = useLocalStorage<string>("church.thumbnail.pastor", "");
     const [title, setTitle] = useLocalStorage<string>("church.thumbnail.title", "");
     const [date, setDate] = useLocalStorage<string>("church.thumbnail.date", "");
+    const [churchName, setChurchName] = useLocalStorage<string>("church.thumbnail.churchName", "");
+    const [serviceType, setServiceType] = useLocalStorage<string>("church.thumbnail.serviceType", "");
     const [layout, setLayout] = useState<LayoutType>("overlay");
 
     useEffect(() => {
@@ -56,14 +58,14 @@ function App() {
         <div className="min-h-screen bg-gray-50">
             <div className="container mx-auto px-4 py-8 max-w-screen-lg">
                 <header className="mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">Church Thumbnail Generator</h1>
-                    <p className="text-gray-600">Create beautiful YouTube thumbnails for your sermons</p>
+                    <h1 className="text-3xl font-bold text-gray-900 mb-2">교회 썸네일 제작기</h1>
+                    <p className="text-gray-600">아름다운 YouTube 썸네일을 만들어보세요</p>
                 </header>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div className="space-y-6">
                         <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                            <h2 className="text-xl font-semibold mb-4">Bible Reference</h2>
+                            <h2 className="text-xl font-semibold mb-4">성경 구절 선택</h2>
                             <BibleSelector
                                 bibleData={bibleData}
                                 selectedBook={selectedBook}
@@ -75,25 +77,43 @@ function App() {
                         </section>
 
                         <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                            <h2 className="text-xl font-semibold mb-4">Background Image</h2>
-                            <ImageGrid selectedImageId={selectedImageId} onSelectImage={handleImageSelect} />
-                        </section>
-
-                        <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                            <h2 className="text-xl font-semibold mb-4">Metadata</h2>
+                            <h2 className="text-xl font-semibold mb-4">정보 입력</h2>
                             <MetadataForm
                                 pastor={pastor}
                                 title={title}
                                 date={date}
+                                churchName={churchName}
+                                serviceType={serviceType}
                                 bibleRef={bibleRef}
                                 onPastorChange={setPastor}
                                 onTitleChange={setTitle}
                                 onDateChange={setDate}
+                                onChurchNameChange={setChurchName}
+                                onServiceTypeChange={setServiceType}
                             />
                         </section>
+                    </div>
 
+                    <div className="space-y-6">
                         <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                            <h2 className="text-xl font-semibold mb-4">Layout</h2>
+                            <h2 className="text-xl font-semibold mb-4">미리보기</h2>
+                            <ThumbnailPreview
+                                layout={layout}
+                                image={selectedImage}
+                                pastor={pastor}
+                                title={title}
+                                date={date}
+                                churchName={churchName}
+                                serviceType={serviceType}
+                                bibleRef={bibleRef}
+                            />
+                        </section>{" "}
+                        <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                            <h2 className="text-xl font-semibold mb-4">배경 이미지</h2>
+                            <ImageGrid selectedImageId={selectedImageId} onSelectImage={handleImageSelect} />
+                        </section>
+                        <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                            <h2 className="text-xl font-semibold mb-4">레이아웃</h2>
                             <div className="grid grid-cols-2 gap-3">
                                 <button
                                     onClick={() => setLayout("overlay")}
@@ -103,7 +123,7 @@ function App() {
                                             : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                                     }`}
                                 >
-                                    Overlay
+                                    오버레이
                                 </button>
                                 <button
                                     onClick={() => setLayout("minimal")}
@@ -113,40 +133,38 @@ function App() {
                                             : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                                     }`}
                                 >
-                                    Minimal
+                                    미니멀
                                 </button>
                                 <button
                                     onClick={() => setLayout("side-modern")}
-                                    className={`px-4 py-3 rounded-lg font-medium transition-colors text-sm col-span-2 ${
+                                    className={`px-4 py-3 rounded-lg font-medium transition-colors text-sm ${
                                         layout === "side-modern"
                                             ? "bg-primary-500 text-white ring-2 ring-primary-200"
                                             : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                                     }`}
                                 >
-                                    Side Modern
+                                    사이드 모던
+                                </button>
+                                <button
+                                    onClick={() => setLayout("center")}
+                                    className={`px-4 py-3 rounded-lg font-medium transition-colors text-sm ${
+                                        layout === "center"
+                                            ? "bg-primary-500 text-white ring-2 ring-primary-200"
+                                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                    }`}
+                                >
+                                    센터링
                                 </button>
                             </div>
                             <p className="text-sm text-gray-500 mt-3">
                                 {layout === "overlay"
-                                    ? "Text overlaid on image with gradient"
+                                    ? "이미지 위에 그라데이션과 함께 텍스트 배치"
                                     : layout === "minimal"
-                                    ? "Minimal design with corner text"
-                                    : "Modern split layout with diagonal separator"}
+                                    ? "코너에 텍스트가 배치된 미니멀 디자인"
+                                    : layout === "side-modern"
+                                    ? "대각선 구분선이 있는 모던한 분할 레이아웃"
+                                    : "텍스트가 이미지 정가운데 정렬된 레이아웃"}
                             </p>
-                        </section>
-                    </div>
-
-                    <div className="space-y-6">
-                        <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                            <h2 className="text-xl font-semibold mb-4">Preview</h2>
-                            <ThumbnailPreview
-                                layout={layout}
-                                image={selectedImage}
-                                pastor={pastor}
-                                title={title}
-                                date={date}
-                                bibleRef={bibleRef}
-                            />
                         </section>
                     </div>
                 </div>
