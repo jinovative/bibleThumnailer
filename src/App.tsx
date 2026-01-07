@@ -1,13 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { BibleSelector, type BibleData } from "./components/BibleSelector";
 import { ImageGrid, type UnsplashImage } from "./components/ImageGrid";
 import { MetadataForm } from "./components/MetadataForm";
 import { ThumbnailPreview, type LayoutType } from "./components/ThumbnailPreview";
 import { useLocalStorage } from "./hooks/useLocalStorage";
 import type { BibleReference } from "./utils/formatters";
+import bibleDataJson from "./data/bible_converted.json";
 
 function App() {
-    const [bibleData, setBibleData] = useState<BibleData>({});
+    const [bibleData] = useState<BibleData>(bibleDataJson as BibleData);
     const [selectedBook, setSelectedBook] = useLocalStorage<string>("church.thumbnail.book", "");
     const [selectedChapter, setSelectedChapter] = useLocalStorage<number | null>("church.thumbnail.chapter", null);
     const [selectedVerse, setSelectedVerse] = useLocalStorage<number | null>("church.thumbnail.verse", null);
@@ -25,17 +26,6 @@ function App() {
     const [churchName, setChurchName] = useLocalStorage<string>("church.thumbnail.churchName", "");
     const [serviceType, setServiceType] = useLocalStorage<string>("church.thumbnail.serviceType", "");
     const [layout, setLayout] = useState<LayoutType>("overlay");
-
-    useEffect(() => {
-        fetch("/bible_converted.json")
-            .then((res) => res.json())
-            .then((data: BibleData) => {
-                setBibleData(data);
-            })
-            .catch((error) => {
-                console.error("Error loading Bible data:", error);
-            });
-    }, []);
 
     const handleBibleSelect = (book: string, chapter: number, verse: number, endVerse?: number) => {
         setSelectedBook(book);
