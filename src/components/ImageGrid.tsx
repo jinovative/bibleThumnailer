@@ -1,6 +1,15 @@
 import { useState, useEffect, useRef } from "react";
 import { cn } from "../utils/cn";
 import { Check, Upload } from "lucide-react";
+import ch1Image from "../assets/ch1.jpeg";
+import ch2Image from "../assets/ch2.jpeg";
+import ch3Image from "../assets/ch3.jpg";
+import ch4Image from "../assets/ch4.jpeg";
+import ch5Image from "../assets/ch5.jpeg";
+import ch6Image from "../assets/ch6.jpeg";
+import ch7Image from "../assets/ch7.jpg";
+import ch8Image from "../assets/ch8.jpg";
+import ch9Image from "../assets/ch9.jpg";
 
 export interface UnsplashImage {
     id: string;
@@ -25,101 +34,92 @@ const SAMPLE_IMAGES: UnsplashImage[] = [
     {
         id: "1",
         urls: {
-            thumb: "https://images.unsplash.com/photo-1477672680933-0287a151330e?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=147?w=300",
-            regular:
-                "https://images.unsplash.com/photo-1477672680933-0287a151330e?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=147?w=800",
-            full: "https://images.unsplash.com/photo-1477672680933-0287a151330e?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=147?w=1920",
+            thumb: ch1Image,
+            regular: ch1Image,
+            full: ch1Image,
         },
-        alt_description: "Church building",
-        user: { name: "Unsplash" },
+        alt_description: "Church image 1",
+        user: { name: "Local Assets" },
     },
     {
         id: "2",
         urls: {
-            thumb: "https://images.unsplash.com/photo-1504052434569-70ad5836ab65?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1470?w=300",
-            regular:
-                "https://images.unsplash.com/photo-1504052434569-70ad5836ab65?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1470?w=800",
-            full: "https://images.unsplash.com/photo-1504052434569-70ad5836ab65?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1470?w=1920",
+            thumb: ch2Image,
+            regular: ch2Image,
+            full: ch2Image,
         },
-        alt_description: "Cross on wall",
-        user: { name: "Unsplash" },
+        alt_description: "Church image 2",
+        user: { name: "Local Assets" },
     },
     {
         id: "3",
         urls: {
-            thumb: "https://images.unsplash.com/photo-1536704231234-beca9772ca68?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1548?w=300",
-            regular:
-                "https://images.unsplash.com/photo-1536704231234-beca9772ca68?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1548?w=800",
-            full: "https://images.unsplash.com/photo-1536704231234-beca9772ca68?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1548?w=1920",
+            thumb: ch3Image,
+            regular: ch3Image,
+            full: ch3Image,
         },
-        alt_description: "Bible on table",
-        user: { name: "Unsplash" },
+        alt_description: "Church image 3",
+        user: { name: "Local Assets" },
     },
     {
         id: "4",
         urls: {
-            thumb: "http://images.unsplash.com/photo-1528825539566-2bcb5882445c?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1470?w=300",
-            regular:
-                "http://images.unsplash.com/photo-1528825539566-2bcb5882445c?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1470?w=800",
-            full: "http://images.unsplash.com/photo-1528825539566-2bcb5882445c?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1470?w=1920",
+            thumb: ch4Image,
+            regular: ch4Image,
+            full: ch4Image,
         },
-        alt_description: "Stained glass window",
-        user: { name: "Unsplash" },
+        alt_description: "Church image 4",
+        user: { name: "Local Assets" },
     },
     {
         id: "5",
         urls: {
-            thumb: "https://images.unsplash.com/photo-1554623301-7ab68a2a30e1?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1470?w=300",
-            regular:
-                "https://images.unsplash.com/photo-1554623301-7ab68a2a30e1?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1470?w=800",
-            full: "https://images.unsplash.com/photo-1554623301-7ab68a2a30e1?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1470?w=1920",
+            thumb: ch5Image,
+            regular: ch5Image,
+            full: ch5Image,
         },
-        alt_description: "Prayer hands",
-        user: { name: "Unsplash" },
+        alt_description: "Church image 5",
+        user: { name: "Local Assets" },
     },
     {
         id: "6",
         urls: {
-            thumb: "https://images.unsplash.com/photo-1448227700746-d8eab5a1b9d7?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1470?w=300",
-            regular:
-                "https://images.unsplash.com/photo-1448227700746-d8eab5a1b9d7?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1470?w=800",
-            full: "https://images.unsplash.com/photo-1448227700746-d8eab5a1b9d7?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1470?w=1920",
+            thumb: ch6Image,
+            regular: ch6Image,
+            full: ch6Image,
         },
-        alt_description: "Worship setting",
-        user: { name: "Unsplash" },
+        alt_description: "Church image 6",
+        user: { name: "Local Assets" },
     },
     {
         id: "7",
         urls: {
-            thumb: "https://images.unsplash.com/photo-1470686164816-830d3688f62c?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1473?w=300",
-            regular:
-                "https://images.unsplash.com/photo-1470686164816-830d3688f62c?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1473?w=800",
-            full: "https://images.unsplash.com/photo-1470686164816-830d3688f62c?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1473?w=1920",
+            thumb: ch7Image,
+            regular: ch7Image,
+            full: ch7Image,
         },
-        alt_description: "Worship setting",
-        user: { name: "Unsplash" },
+        alt_description: "Church image 7",
+        user: { name: "Local Assets" },
     },
     {
         id: "8",
         urls: {
-            thumb: "https://images.unsplash.com/photo-1480185660311-81671f39489c?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1469?w=300",
-            regular:
-                "https://images.unsplash.com/photo-1480185660311-81671f39489c?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1469?w=800",
-            full: "https://images.unsplash.com/photo-1480185660311-81671f39489c?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1469?w=1920",
+            thumb: ch8Image,
+            regular: ch8Image,
+            full: ch8Image,
         },
-        alt_description: "Worship setting",
-        user: { name: "Unsplash" },
+        alt_description: "Church image 8",
+        user: { name: "Local Assets" },
     },
     {
         id: "9",
         urls: {
-            thumb: "https://images.unsplash.com/photo-1499652848871-1527a310b13a?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1548?w=300",
-            regular:
-                "https://images.unsplash.com/photo-1499652848871-1527a310b13a?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1548?w=800",
-            full: "https://images.unsplash.com/photo-1499652848871-1527a310b13a?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1548?w=1920",
+            thumb: ch9Image,
+            regular: ch9Image,
+            full: ch9Image,
         },
-        alt_description: "Worship setting",
-        user: { name: "Unsplash" },
+        alt_description: "Church image 9",
+        user: { name: "Local Assets" },
     },
 ];
 
